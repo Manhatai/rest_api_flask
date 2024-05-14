@@ -4,29 +4,29 @@ from flask_restful import Api, Resource, reqparse
 app = Flask(__name__) 
 api = Api(app) 
 
-cars = {
-    "bmw1": {"brand": "bmw", "model": "e36", "year": 2013, "malfunction": "overheating"},
-    "toyota1": {"brand": "toyota", "model": "supra", "year": 1996, "malfunction": "flat_tires"},
-    "mitsubishi1": {"brand": "mitsubishi", "model": "lancer", "year": 2008, "malfunction": "dead_battery"},
-    "skoda1": {"brand": "skoda", "model": "fabia", "year": 2018, "malfunction": "fuel_economy"},
-    "ford1": {"brand": "ford", "model": "focus", "year": 2010, "malfunction": "steering"}
-}
+cars = [
+    { "brand": "bmw", "model": "e36", "year": 2013, "malfunction": "overheating"            },
+    { "brand": "toyota", "model": "supra", "year": 1996, "malfunction": "flat_tires"        },
+    { "brand": "mitsubishi", "model": "lancer", "year": 2008, "malfunction": "dead_battery" },
+    { "brand": "skoda", "model": "fabia", "year": 2018, "malfunction": "fuel_economy"       },
+    { "brand": "ford", "model": "focus", "year": 2010, "malfunction": "steering"            }
+]
 
-clients = {
-    "mateusz": {"phone": 607962056, "firstName": "mateusz"},
-    "tomasz": {"phone": 123456789, "firstName": "tomasz"},
-    "andrzej": {"phone": 678234321, "firstName": "andrzej"},
-    "krzysztof": {"phone": 890123435, "firstName": "krzysztof"},
-    "szymon": {"phone": 796140911, "firstName": "szymon"}
-}
+clients = [
+    { "name": "mateusz", "phone": 607962056   },
+    { "name": "tomasz", "phone": 123456789    },
+    { "name": "andrzej", "phone": 678234321   },
+    { "name": "krzysztof", "phone": 890123435 },
+    { "name": "szymon", "phone": 796140911    }
+]
 
-booking = {
-    "00023": {"date": "12.06.2024", "hour": "15:00"},
-    "00046": {"date": "4.06.2024", "hour": "17:00"},
-    "00133": {"date": "1.06.2024", "hour": "8:00"},
-    "00067": {"date": "10.06.2024", "hour": "10:00"},
-    "00089": {"date": "27.06.2024", "hour": "19:00"},
-}
+booking = [
+    { "id": "00023","date": "12.06.2024", "hour": "15:00", "car": cars[0], 'client': clients[0] },
+    { "id": "00046","date": "4.06.2024", "hour": "17:00", "car": cars[1], 'client': clients[0]  },
+    { "id": "00133","date": "1.06.2024", "hour": "8:00", "car": cars[2], 'client': clients[0]   },
+    { "id": "00067","date": "10.06.2024", "hour": "10:00", "car": cars[3], 'client': clients[0] },
+    { "id": "00089","date": "27.06.2024", "hour": "19:00", "car": cars[4], 'client': clients[0] },
+]
 
 booking_put_args = reqparse.RequestParser() # Automatically parses through the request being sent (checks if it hass all necesary data)
 booking_put_args.add_argument("date", type=str, help="Date of the new booking")
@@ -65,8 +65,8 @@ class BookingList(Resource):
         
 
 api.add_resource(Clients, "/clients/<string:name>") # The endpoint is set to the clients first name
-api.add_resource(Cars, "/cars/<string:name>")
-api.add_resource(Booking, "/booking/<string:name>")
+api.add_resource(Cars, "/cars/<string:brand>")
+api.add_resource(Booking, "/booking/<string:id>")
 
 
 api.add_resource(ClientsList, "/clients")

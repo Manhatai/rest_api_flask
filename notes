@@ -7,6 +7,8 @@ I'm learning the basics of how it all works. Flask-RESTful docummentation proved
 
 Learning bulletpoints:
 - Whenever we send a request, we send it to http://127.0.0.1:5000/
+- The main building block provided bu Flask-RESTful are 'resources', giving easy access to multiple HTTP methods.
 - app = Flask(__name__) is how every flask app starts
 - app.run(debug=True) is how every flask app ends
-- Whenever python runs a script, it sets __name__ to __main__. If our file was imported as a module (e.g. import learning.py as learning), it wouldn't execute immediately.
+- Whenever python runs a script, it sets __name__ to __main__. If our file was imported as a module (e.g. import learning.py as learning), it wouldn't execute immediately, thanks to the last 'if' statement.
+
