@@ -1,0 +1,12 @@
+Whenever we send a request, we send it to http://127.0.0.1:5000
+
+Progress:
+
+Day 1;
+I'm learning the basics of how it all works. Flask-RESTful docummentation proved very usefull at understanding basic concepts of how API works and how to set it up in code (https://flask-restful.readthedocs.io/en/latest/quickstart.html). Main files I worked on during this time were 'learning.py', which contains the main API code, and 'test.py' which executes certain requests based on the structure of 'requests' variable. With comments I tried my best to documment what certain parts of the code do.
+
+Learning bulletpoints:
+- Whenever we send a request, we send it to http://127.0.0.1:5000/
+- app = Flask(__name__) is how every flask app starts
+- app.run(debug=True) is how every flask app ends
+- Whenever python runs a script, it sets __name__ to __main__. If our file was imported as a module (e.g. import learning.py as learning), it wouldn't execute immediately.
