@@ -12,3 +12,19 @@ Learning bulletpoints:
 - app.run(debug=True) is how every flask app ends
 - Whenever python runs a script, it sets __name__ to __main__. If our file was imported as a module (e.g. import learning.py as learning), it wouldn't execute immediately, thanks to the last 'if' statement.
 
+
+Day 2;
+Finally managed to fix 'get' requests for particular dictionaries from the different arrays. It properly displays whatever is called. All it needed to work was defining endpoints as an id of each element instead of trying to making it a string of some kind. Might be less clear visually, but it works as intended. 'Get' requests are all ready and working. I'm starting to work on other stuff now. I tried adding some failsafes but ran into multiple errors with little time to fix them. I'm putting this idea off for now. I also cleaned up some code.
+
+6 HOURS AFTER UPDATE:
+I had to change all of the arrays into dicts. Otherwise the put/post method wouldn't work.
+
+Learning bulletpoints:
+- It's always easier to call stuff by ID rather than strings
+- JSON arrays can display data pulled from each other by calling specific id's of said json's
+- .gitignore always needs to be in the main folder rather than any subfolders (like .venv), otherwise it might not ignore some important stuff
+- It's common practice to define endpoints both for the whole arrays and for particular items
+- Insomnia (HTTP client I'm using) is a very handy tool, way easier to send requests this way rather than manually
+- Errors can be handled with 'abort' function provided by flask-restful (not implemented YET)
+- Important status codes - 404, 409, 201
+- You can't add new json-style values into a list of dicts just by using post or put, each value has to have a clearly separate id, so the only solution is a dict containing dicts 
