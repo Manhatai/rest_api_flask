@@ -1,5 +1,5 @@
 from flask import Flask         
-from flask_restful import Api, Resource, reqparse #abort
+from flask_restful import Api, Resource, reqparse #abort? (wip)
 
 app = Flask(__name__) 
 api = Api(app) 
@@ -30,7 +30,7 @@ bookings = {
 }
 
 
-clients_put_args = reqparse.RequestParser()
+clients_put_args = reqparse.RequestParser() # Automatically parses through the request being sent (checks if it hass all necesary data)
 clients_put_args.add_argument( "firstName", type=str, help="Clients first name is required.", required=True )
 clients_put_args.add_argument( "phone", type=int, help="Phone number is required.", required=True           )
 
@@ -40,7 +40,7 @@ cars_put_args.add_argument( "model", type=str, help="Model name is required.", r
 cars_put_args.add_argument( "year", type=int, help="Production year is required.", required=True         )
 cars_put_args.add_argument( "malfunction", type=str, help="Malfunction type is required.", required=True )
 
-bookings_put_args = reqparse.RequestParser() # Automatically parses through the request being sent (checks if it hass all necesary data)
+bookings_put_args = reqparse.RequestParser()
 bookings_put_args.add_argument( "id", type=int, help="ID of the new booking is required.", required=True     )
 bookings_put_args.add_argument( "date", type=str, help="Date of the new booking is required.", required=True )
 bookings_put_args.add_argument( "hour", type=str, help="Hour of the new booking is required.", required=True )
@@ -51,17 +51,16 @@ class Clients(Resource):
     def get(self, client_id):
         return clients[client_id] # Returns particular items based on the id provided
     
-    def put(self, client_id): # 
+    def put(self, client_id): #
         args = clients_put_args.parse_args() # Takes all the arguments provided by request parser
         clients[client_id] = args # Updates or creates an entry based on the values provided
         return clients[client_id], 201 # 201 = CREATED message
     
     def delete(self, client_id):
-        del clients[client_id] # Deletes entry with x id
+        del clients[client_id] # Deletes an entry with x id
         return f'Item with id {client_id} deleted from clients list', 204
     
     # A post method prooved to be completely redundant, as put can do the exact same thing.
-
     
 class Cars(Resource):
     def get(self, car_id): 
@@ -75,7 +74,6 @@ class Cars(Resource):
     def delete(self, car_id):
         del cars[car_id]
         return f'Item with id {car_id} deleted from cars list', 204
-
     
 class Bookings(Resource):
     def get(self, booking_id):
@@ -89,7 +87,6 @@ class Bookings(Resource):
     def delete(self, booking_id):
         del bookings[booking_id]
         return f'Item with id {booking_id} deleted from bookings list', 204
-
 
 # Get item lists
 class ClientsList(Resource): # Returns lists of items
@@ -106,7 +103,7 @@ class BookingList(Resource):
 
 
 # Defining endpoints
-api.add_resource(Clients, "/clients/<int:client_id>") # The endpoint is set to the clients id, its essentialy an input id
+api.add_resource(Clients, "/clients/<int:client_id>") # The endpoint is set to the id essentialy beeing an input id
 api.add_resource(Cars, "/cars/<int:car_id>")
 api.add_resource(Bookings, "/bookings/<int:booking_id>")
 
@@ -118,24 +115,3 @@ api.add_resource(BookingList, "/bookings")
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-"""
-    GET - a list of all planed repairs
-    POST - adding to the repairs list
-    DELETE - deleting from the repairs list
-    PUT - updating the repairs list
-
-Car:
-- brand
-- model
-- year of production
-- malfunction
-
-Client:
-- phone number
-- name
-
-Booking:
-- date and hour
-"""

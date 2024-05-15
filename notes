@@ -17,7 +17,7 @@ Day 2;
 Finally managed to fix 'get' requests for particular dictionaries from the different arrays. It properly displays whatever is called. All it needed to work was defining endpoints as an id of each element instead of trying to making it a string of some kind. Might be less clear visually, but it works as intended. I'm starting to work on other stuff now, like put or post. I tried adding some failsafes but ran into multiple errors with little time to fix them. I'm putting this idea off for now. I also cleaned up some code.
 
 6 HOURS AFTER UPDATE:
-I had to change all of the arrays into dicts. Otherwise the put/post method wouldn't work. The project as a whole is working as intended. 
+I had to change all of the arrays into dicts. Otherwise the put/post method wouldn't work. The project as a whole is working as intended. The next day I will be delving into how a database works and should be implemented. 
 
 Learning bulletpoints:
 - It's always easier to call stuff by ID rather than strings
