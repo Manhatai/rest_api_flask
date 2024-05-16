@@ -1,6 +1,6 @@
-# Same as app.py, just with a database (about to be) included.
+# Same as app.py, just with a database included.
 from flask import Flask         
-from flask_restful import Api, Resource, reqparse, fields, marshal_with #abort (WIP)
+from flask_restful import Api, Resource, reqparse, fields, marshal_with #abort - for specialized error messages (WIP)
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -9,15 +9,15 @@ api = Api(app) # Initializes app with Api extension
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workshop.db' # Database name and location, same directiory as script
 db = SQLAlchemy(app) # Same as above
 
-class ClientsModel(db.Model):
+class ClientsModel(db.Model): # Basically a database table
     id = db.Column(db.Integer, primary_key=True) # Primary key = unique identifier
     firstName = db.Column(db.String)
     phone = db.Column(db.Integer, nullable=False) # nullable=False = Can't be null
 
 class CarsModel(db.Model):
-    id = db.Column(db.Integer, primary_key=True) # Primary key = unique identifier
+    id = db.Column(db.Integer, primary_key=True) 
     brand = db.Column(db.String, nullable=False)
-    model = db.Column(db.String) # nullable=False = Can't be null
+    model = db.Column(db.String) 
     year = db.Column(db.String)
     malfunction = db.Column(db.String)
 
@@ -29,7 +29,7 @@ clients_put_args = reqparse.RequestParser() # Automatically parses through the r
 clients_put_args.add_argument( "firstName", type=str, help="Clients first name is required.", required=True )
 clients_put_args.add_argument( "phone", type=int, help="Phone number is required.", required=True           )
 
-resource_fields_clients = { # Making a dictionary that defines fields from the database model, helping to serialize it
+resource_fields_clients = { # Making a dictionary that defines fields from the database model, helping to serialize it (for'marshal_with').
     'id': fields.Integer,
     'firstName': fields.String,
     'phone': fields.Integer
@@ -58,12 +58,11 @@ bookings_put_args.add_argument( "hour", type=str, help="Hour of the new booking 
 # BOOKINGS RESOURCE FIELD PLACEHOLDER #
 #######################################
   
-# Get specific elements from an array
 class Clients(Resource): 
 
     @marshal_with(resource_fields_clients) # Takes the resource value we get from result and serializes it by resource_fields, making it easy to read for the database. Very important!
     def get(self, client_id):
-        client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id, outputs the first one only (id's are unique)
+        client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id, outputs the first one only (id's are unique). Query - from SQL.
         return client, 200
     
     @marshal_with(resource_fields_clients)
@@ -71,15 +70,15 @@ class Clients(Resource):
         args = clients_put_args.parse_args()
         client = ClientsModel(id=client_id, firstName=args['firstName'], phone=args['phone'])
         db.session.add(client) # Adds an object to a database session
-        db.session.commit() # Commits changes to the session
-        return client, 201 # 201 = CREATED message
+        db.session.commit() # Commits changes to the database
+        return client, 201 # 201 = CREATED 
     
     @marshal_with(resource_fields_clients)
     def put(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first()
         args = clients_put_args.parse_args()
         if 'firstName' in args:
-            client.firstName = args['firstName'] # I should optimize it somehow?
+            client.firstName = args['firstName'] # I should optimize it somehow (?)
         if 'phone' in args:
             client.phone = args['phone']
         db.session.add(client)
@@ -89,9 +88,9 @@ class Clients(Resource):
     @marshal_with(resource_fields_clients)
     def delete(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first()
-        db.session.delete(client)# Deletes an entry with x id
+        db.session.delete(client) # Deletes an entry
         db.session.commit()
-        return '', 410 # 410 = gone
+        return '', 410 # 410 = GONE
     
     
 class Cars(Resource):
@@ -147,7 +146,7 @@ class Bookings(Resource):
 
 # Get item lists
 
-class ClientsList(Resource): # Returns lists of items
+class ClientsList(Resource): # Returns a list of items
 
     @marshal_with(resource_fields_clients)
     def get(self): 
@@ -155,7 +154,6 @@ class ClientsList(Resource): # Returns lists of items
         return clients
     
 class CarsList(Resource):
-    
     @marshal_with(resource_fields_cars)
     def get(self): 
         cars = CarsModel.query.all()
@@ -178,6 +176,4 @@ api.add_resource(BookingList, "/bookings")
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        app.run(debug=True)
+    app.run(debug=True)
