@@ -1,30 +1,23 @@
-Whenever we send a request, we send it to http://127.0.0.1:5000
+clients = {
+    0: { "firstName": "mateusz", "phone": 607962056   },
+    1: { "firstName": "tomasz", "phone": 123456789    },
+    2: { "firstName": "andrzej", "phone": 678234321   },
+    3: { "firstName": "krzysztof", "phone": 890123435 },
+    4: { "firstName": "szymon", "phone": 796140911    }
+}
 
-Progress:
+cars = {
+    0: { "brand": "bmw", "model": "e36", "year": 2013, "malfunction": "overheating"            },
+    1: { "brand": "toyota", "model": "supra", "year": 1996, "malfunction": "flat_tires"        },
+    2: { "brand": "mitsubishi", "model": "lancer", "year": 2008, "malfunction": "dead_battery" },
+    3: { "brand": "skoda", "model": "fabia", "year": 2018, "malfunction": "fuel_economy"       },
+    4: { "brand": "ford", "model": "focus", "year": 2010, "malfunction": "steering"            }
+}
 
-Day 1;
-I'm learning the basics of how it all works. Flask-RESTful docummentation proved very usefull at understanding basic concepts of how API works and how to set it up in code (https://flask-restful.readthedocs.io/en/latest/quickstart.html). Main files I worked on during this time were 'learning.py', which contains the main API code, and 'test.py' which executes certain requests based on the structure of 'requests' variable. With comments I tried my best to documment what certain parts of the code do.
-
-Learning bulletpoints:
-- Whenever we send a request, we send it to http://127.0.0.1:5000/
-- The main building block provided bu Flask-RESTful are 'resources', giving easy access to multiple HTTP methods.
-- app = Flask(__name__) is how every flask app starts
-- app.run(debug=True) is how every flask app ends
-- Whenever python runs a script, it sets __name__ to __main__. If our file was imported as a module (e.g. import learning.py as learning), it wouldn't execute immediately, thanks to the last 'if' statement.
-
-
-Day 2;
-Finally managed to fix 'get' requests for particular dictionaries from the different arrays. It properly displays whatever is called. All it needed to work was defining endpoints as an id of each element instead of trying to making it a string of some kind. Might be less clear visually, but it works as intended. I'm starting to work on other stuff now, like put or post. I tried adding some failsafes but ran into multiple errors with little time to fix them. I'm putting this idea off for now. I also cleaned up some code.
-
-6 HOURS AFTER UPDATE:
-I had to change all of the arrays into dicts. Otherwise the put/post method wouldn't work. The project as a whole is working as intended. The next day I will be delving into how a database works and should be implemented. 
-
-Learning bulletpoints:
-- It's always easier to call stuff by ID rather than strings
-- JSON arrays can display data pulled from each other by calling specific id's of said json's
-- .gitignore always needs to be in the main folder rather than any subfolders (like .venv), otherwise it might not ignore some important stuff
-- It's common practice to define endpoints both for the whole arrays and for particular items
-- Insomnia (HTTP client I'm using) is a very handy tool, way easier to send requests this way rather than manually
-- Errors can be handled with 'abort' function provided by flask-restful (not implemented YET)
-- Important status codes - 404, 409, 201
-- You can't add new json-style values into a list of dicts just by using post or put, each value has to have a clearly separate id, so the only solution is a dict containing dicts 
+bookings = {
+    0: { "id": 23, "date": "12.06.2024", "hour": "15:00", "car": cars[0], 'client': clients[0] },
+    1: { "id": 46, "date": "4.06.2024", "hour": "17:00", "car": cars[1], 'client': clients[1]  },
+    2: { "id": 133, "date": "1.06.2024", "hour": "8:00", "car": cars[2], 'client': clients[2]  },
+    3: { "id": 67, "date": "10.06.2024", "hour": "10:00", "car": cars[3], 'client': clients[3] },
+    4: { "id": 89, "date": "27.06.2024", "hour": "19:00", "car": cars[4], 'client': clients[4] },
+}
