@@ -1,23 +1,28 @@
 clients = {
-    0: { "firstName": "mateusz", "phone": 607962056   },
-    1: { "firstName": "tomasz", "phone": 123456789    },
-    2: { "firstName": "andrzej", "phone": 678234321   },
-    3: { "firstName": "krzysztof", "phone": 890123435 },
-    4: { "firstName": "szymon", "phone": 796140911    }
+    { "firstName": "mateusz", "phone": 607962056   },
+    { "firstName": "tomasz", "phone": 123456789    },
+    { "firstName": "andrzej", "phone": 678234321   },
+    { "firstName": "krzysztof", "phone": 890123435 },
+    { "firstName": "szymon", "phone": 796140911    }
 }
 
 cars = {
-    0: { "brand": "bmw", "model": "e36", "year": 2013, "malfunction": "overheating"            },
-    1: { "brand": "toyota", "model": "supra", "year": 1996, "malfunction": "flat_tires"        },
-    2: { "brand": "mitsubishi", "model": "lancer", "year": 2008, "malfunction": "dead_battery" },
-    3: { "brand": "skoda", "model": "fabia", "year": 2018, "malfunction": "fuel_economy"       },
-    4: { "brand": "ford", "model": "focus", "year": 2010, "malfunction": "steering"            }
+    { "brand": "bmw", "model": "e36", "year": 2013, "malfunction": "overheating"            },
+    { "brand": "toyota", "model": "supra", "year": 1996, "malfunction": "flat_tires"        },
+    { "brand": "mitsubishi", "model": "lancer", "year": 2008, "malfunction": "dead_battery" },
+    { "brand": "skoda", "model": "fabia", "year": 2018, "malfunction": "fuel_economy"       },
+    { "brand": "ford", "model": "focus", "year": 2010, "malfunction": "steering"            }
 }
 
 bookings = {
-    0: { "id": 23, "date": "12.06.2024", "hour": "15:00", "car": cars[0], 'client': clients[0] },
-    1: { "id": 46, "date": "4.06.2024", "hour": "17:00", "car": cars[1], 'client': clients[1]  },
-    2: { "id": 133, "date": "1.06.2024", "hour": "8:00", "car": cars[2], 'client': clients[2]  },
-    3: { "id": 67, "date": "10.06.2024", "hour": "10:00", "car": cars[3], 'client': clients[3] },
-    4: { "id": 89, "date": "27.06.2024", "hour": "19:00", "car": cars[4], 'client': clients[4] },
+    {"date": "12.06.2024", "hour": "15:00", "car_id": 1, "client_id": 1 },
+    {"date": "4.06.2024", "hour": "17:00", "car_id": 2, "client_id": 2  },
+    {"date": "1.06.2024", "hour": "8:00", "car_id": 3, "client_id": 3  },
+    {"date": "10.06.2024", "hour": "10:00", "car_id": 4, "client_id": 4 },
+    {"date": "27.06.2024", "hour": "19:00", "car_id": 5, "client_id": 5 },
 }
+
+For live example:
+{ "firstName": "dominik", "phone": 123456789 }
+{ "brand": "volkswagen", "model": "golf", "year": 2005, "malfunction": "further_info_needed" }
+{ "date": "27.06.2024", "hour": "20:00", "car_id": 6, "client_id": 6 }
