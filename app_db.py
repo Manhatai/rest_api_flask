@@ -64,7 +64,7 @@ resource_fields_cars = { # Making a dictionary that defines fields from the data
 bookings_put_args = reqparse.RequestParser()
 bookings_put_args.add_argument( "date", type=str, help="Date of the new booking is required.", required=True )
 bookings_put_args.add_argument( "hour", type=str, help="Hour of the new booking is required.", required=True )
-bookings_put_args.add_argument( "car_id", type=int, help="Car's id is required.", required=True )
+bookings_put_args.add_argument( "car_id", type=int, help="Car's ID is required.", required=True )
 bookings_put_args.add_argument( "client_id", type=int, help="Client's id is required.", required=True )
 
 resource_fields_bookings = { # Making a dictionary that defines fields from the database model, helping to serialize it
@@ -90,7 +90,7 @@ class Clients(Resource):
         args = clients_put_args.parse_args()
         client_check = ClientsModel.query.filter_by(id = client_id).first()
         if client_check != None:
-            abort(409, message="Client id already exists...")
+            abort(409, message="Client ID already exists...")
         ClientsModel.query.filter_by(id = client_id).first()
         client = ClientsModel(id=client_id, firstName=args['firstName'], phone=args['phone'])
         db.session.add(client) # Adds an object to a database
@@ -101,7 +101,7 @@ class Clients(Resource):
     def put(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first()
         if client == None:
-            abort(404, message="Client with this ID doesn't exists...")
+            abort(404, message="Client with this id doesn't exists...")
         args = clients_put_args.parse_args()
         for key, value in args.items(): # .items() allows to iterate by both keys and values 
             setattr(client, key, value) # setattr very helpful while working with JSON's
@@ -113,7 +113,7 @@ class Clients(Resource):
     def delete(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first()
         if client == None:
-            abort(404, message="Client with this ID doesn't exists...")
+            abort(404, message="Client with this id doesn't exists...")
         booking_check = BookingsModel.query.filter_by(id = client_id).first()
         if booking_check != None:
             abort(409, message="Client has a booking history! Delete booking history first to proceed...")
@@ -146,7 +146,7 @@ class Cars(Resource):
     def put(self, car_id):
         car = CarsModel.query.filter_by(id = car_id).first()
         if car == None:
-            abort(404, message="Car with this ID doesn't exists...")
+            abort(404, message="Car with this id doesn't exists...")
         args = cars_put_args.parse_args()
         for key, value in args.items(): 
             setattr(car, key, value) 
@@ -158,7 +158,7 @@ class Cars(Resource):
     def delete(self, car_id):
         car = CarsModel.query.filter_by(id = car_id).first()
         if car == None:
-            abort(404, message="Car with this ID doesn't exists...")
+            abort(404, message="Car with this id doesn't exists...")
         booking_check = BookingsModel.query.filter_by(id = car_id).first()
         if booking_check != None:
             abort(409, message="Client has a booking history! Delete booking history first to proceed...")
@@ -185,10 +185,10 @@ class Bookings(Resource):
             abort(409, message="Booking id already exists...")
         car = CarsModel.query.filter_by(id=args['car_id']).first() # Takes the car/client id the user provided and 
         if car == None:
-            abort(404, message="Car ID not found...")
+            abort(404, message="Car id not found...")
         client = ClientsModel.query.filter_by(id=args['client_id']).first()
         if client == None:
-            abort(404, message="Client ID not found...")
+            abort(404, message="Client id not found...")
         booking = BookingsModel(id=booking_id, date=args['date'], hour=args['hour'], car_id=car.id, client_id=client.id) # car_id=car.id checks if car's/client's id proviced by user is present in the database. If its not, the request returns an "AtributeError".
         db.session.add(booking)
         db.session.commit()
@@ -198,7 +198,7 @@ class Bookings(Resource):
     def put(self, booking_id):
         booking = BookingsModel.query.filter_by(id = booking_id).first()
         if booking == None:
-            abort(404, message="Booking with this ID doesn't exists...")        
+            abort(404, message="Booking with this id doesn't exists...")        
         print(booking)
         args = bookings_put_args.parse_args()
         for key, value in args.items(): 
@@ -211,7 +211,7 @@ class Bookings(Resource):
     def delete(self, booking_id):
         booking = BookingsModel.query.filter_by(id=booking_id).first()
         if booking == None:
-            abort(404, message="Booking with this ID doesn't exists...")   
+            abort(404, message="Booking with this id doesn't exists...")   
         db.session.delete(booking)
         db.session.commit()
         return 'Resource deleted...', 204
