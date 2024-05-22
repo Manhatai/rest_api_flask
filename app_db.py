@@ -2,8 +2,12 @@
 from flask import Flask         
 from flask_restful import Api, Resource, reqparse, fields, marshal_with, abort
 from flask_sqlalchemy import SQLAlchemy
+import logging
 
-
+logging.basicConfig(filename="logs.log", 
+                    level=logging.DEBUG, # logs everything with DEBUG severity level and above (DEBUG, INFO, WARNING, ERROR, and CRITICAL)
+                    format="%(asctime)s %(levelname)s:%(name)s:%(message)s") # asctime - date and hour right now
+logger = logging.getLogger(__name__)
 app = Flask(__name__) 
 api = Api(app) # Initializes app with Api extension
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workshop.db' # Database name and location, same directiory as script
@@ -82,7 +86,9 @@ class Clients(Resource):
     def get(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id picking the first one to display (WITHOUT .first() IT ALWAYS RETURNS A NULL AND CAUSES AN ERROR!!!). Query - from SQL.
         if not client: # if not client: <==> if client == False: 
+            logger.info(f"Client with id {client_id} not found. [404]")
             abort(404, message="Client not found...")  # 404 = Not Found  
+        logger.info(f"GET request for client: {client_id} successfull. [200]") # Saves what happened with the server in logs.log - file
         return client, 200
     
     @marshal_with(resource_fields_clients)
@@ -90,35 +96,41 @@ class Clients(Resource):
         args = clients_put_args.parse_args()
         client_check = ClientsModel.query.filter_by(id = client_id).first()
         if client_check != None:
-            abort(409, message="Client ID already exists...")
+            logger.info(f"Failed to create a client with id {client_id} . [409]")
+            abort(409, message="Client ID already exists...") # 409 - Conflict
         ClientsModel.query.filter_by(id = client_id).first()
         client = ClientsModel(id=client_id, firstName=args['firstName'], phone=args['phone'])
         db.session.add(client) # Adds an object to a database
         db.session.commit() # Commits changes to the database
+        logger.info(f"Client created with ID {client_id} successfully. [201]")
         return client, 201 # 201 = CREATED 
     
     @marshal_with(resource_fields_clients)
     def put(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first()
         if client == None:
+            logger.info(f"Client with id {client_id} failed to update. [404]")
             abort(404, message="Client with this id doesn't exists...")
         args = clients_put_args.parse_args()
         for key, value in args.items(): # .items() allows to iterate by both keys and values 
             setattr(client, key, value) # setattr very helpful while working with JSON's
         db.session.add(client)
         db.session.commit()
+        logger.info(f"Client with id {client_id} updated successfully.")
         return client, 201
     
     @marshal_with(resource_fields_clients)
     def delete(self, client_id):
         client = ClientsModel.query.filter_by(id = client_id).first()
         if client == None:
+            logger.info(f"Failed to update client with id {client_id}. [404]")
             abort(404, message="Client with this id doesn't exists...")
         booking_check = BookingsModel.query.filter_by(id = client_id).first()
         if booking_check != None:
             abort(409, message="Client has a booking history! Delete booking history first to proceed...")
         db.session.delete(client) # Deletes an entry
         db.session.commit()
+        logger.info(f"Client with id {client_id} deleted successfully.")
         return 'Resource deleted...', 204 # 204 = No Content
     
     
@@ -128,7 +140,8 @@ class Cars(Resource):
     def get(self, car_id): 
         car = CarsModel.query.filter_by(id = car_id).first()
         if not car:
-            abort(404, message="Client not found...")  # 404 = Not Found  
+            abort(404, message="Client not found...")  # 404 = Not Found 
+        logger.info(f"GET request received for car: {car_id}") 
         return car, 200
     
     @marshal_with(resource_fields_cars)
@@ -224,6 +237,7 @@ class ClientsList(Resource): # Returns a list of items
     @marshal_with(resource_fields_clients)
     def get(self): 
         clients = ClientsModel.query.all() # query.all() = display all the elements from the table
+        logger.info(f"Client list returned successfully. [200]")
         return clients
     
 class CarsList(Resource):
