@@ -48,7 +48,7 @@ clients_put_args.add_argument( "phone", type=int, help="Phone number is required
 resource_fields_clients = { # Making a dictionary that defines fields from the database model, helping to serialize it (for'marshal_with').
     'id': fields.Integer,
     'firstName': fields.String,
-    'phone': fields.Integer
+    'phone': fields.String
 }
 
 cars_put_args = reqparse.RequestParser() 
@@ -119,7 +119,7 @@ class Clients(Resource):
         db.session.delete(client) # Deletes an entry
         db.session.commit()
         logger.info(f"Client with id {client_id} deleted successfully. [204]")
-        return 'Resource deleted...', 204 # 204 = No Content
+        return '', 204 # 204 = No Content
     
     
 class Cars(Resource):
@@ -160,7 +160,7 @@ class Cars(Resource):
         db.session.delete(car)
         db.session.commit()
         logger.info(f"Car with id {car_id} deleted successfully. [204]")
-        return 'Resource deleted...', 204
+        return '', 204
     
 
 
@@ -200,7 +200,7 @@ class Bookings(Resource):
         db.session.delete(booking)
         db.session.commit()
         logger.info(f"Booking with id {booking_id} deleted successfully. [204]")
-        return 'Resource deleted...', 204
+        return '', 204
 
         
 # Get item lists
@@ -261,7 +261,7 @@ class BookingList(Resource):
         booking = BookingsModel(date=args['date'], hour=args['hour'], car_id=car.id, client_id=client.id) # car_id=car.id checks if car's/client's id proviced by user is present in the database. If its not, the request returns an "AtributeError".
         db.session.add(booking)
         db.session.commit()
-        logger.info(f"Booking with id {bookingd} created succesfully. [201]")
+        logger.info(f"Booking with id {booking.id} created succesfully. [201]")
         return booking, 201
 
 
