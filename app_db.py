@@ -16,28 +16,28 @@ db = SQLAlchemy(app) # Same as above
 
 class ClientsModel(db.Model): # Basically a database table
     __tablename__ = 'clients'
-    id = db.Column(db.Integer, primary_key=True) # Primary key = unique identifier
-    firstName = db.Column(db.String(15))
-    phone = db.Column(db.Integer, nullable=False) # nullable=False = Can't be null
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True) # Primary key = unique identifier
+    firstName = db.Column(db.String(15), nullable=False)
+    phone = db.Column(db.String, nullable=False) # nullable=False = Can't be null
     bookings = db.relationship('BookingsModel', back_populates='client') # Defines a relationship to 'BookingsModel'. Could have called it bookings_relation, but it would require resetting the entire database.
 
 class CarsModel(db.Model):
     __tablename__ = 'cars'
-    id = db.Column(db.Integer, primary_key=True) 
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True) 
     brand = db.Column(db.String(15), nullable=False)
-    model = db.Column(db.String(15)) 
-    year = db.Column(db.String(4))
+    model = db.Column(db.String(15), nullable=False) 
+    year = db.Column(db.String(4), nullable=False)
     malfunction = db.Column(db.String(40), nullable=False)
     bookings = db.relationship('BookingsModel', back_populates='car')
 
 class BookingsModel(db.Model):
     __tablename__ = 'bookings'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     date = db.Column(db.String(10), nullable=False)
     hour = db.Column(db.String(5), nullable=False)
     car_id = db.Column(db.Integer, db.ForeignKey('cars.id'), nullable=False)
-    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     car = db.relationship('CarsModel', back_populates='bookings')
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     client = db.relationship('ClientsModel', back_populates='bookings')
 
 
@@ -91,19 +91,6 @@ class Clients(Resource):
         logger.info(f"GET request for client {client_id} successfull. [200]") # Saves what happened with the server in logs.log - file
         return client, 200
     
-    @marshal_with(resource_fields_clients)
-    def post(self, client_id): 
-        args = clients_put_args.parse_args()
-        client_check = ClientsModel.query.filter_by(id = client_id).first()
-        if client_check != None:
-            logger.info(f"Client with id {client_id} already exists. [409]")
-            abort(409, message="Client ID already exists...") # 409 - Conflict
-        ClientsModel.query.filter_by(id = client_id).first()
-        client = ClientsModel(id=client_id, firstName=args['firstName'], phone=args['phone'])
-        db.session.add(client) # Adds an object to a database
-        db.session.commit() # Commits changes to the database
-        logger.info(f"Client created with ID {client_id} successfully. [201]")
-        return client, 201 # 201 = CREATED 
     
     @marshal_with(resource_fields_clients)
     def put(self, client_id):
@@ -117,7 +104,7 @@ class Clients(Resource):
         db.session.add(client)
         db.session.commit()
         logger.info(f"Client with id {client_id} updated successfully. [201]")
-        return client, 201
+        return client, 200
     
     @marshal_with(resource_fields_clients)
     def delete(self, client_id):
@@ -125,9 +112,9 @@ class Clients(Resource):
         if client == None:
             logger.info(f" Client with id {client_id} doesn't exist. [404]")
             abort(404, message="Client with this id doesn't exists...")
-        booking_check = BookingsModel.query.filter_by(id = client_id).first()
+        booking_check = BookingsModel.query.filter_by(client_id = client_id).first()
         if booking_check != None:
-            logger.info(f" Client {client_id} has a booking history. Deletion unsuccessfull. [409]")
+            logger.info(f"Client {client_id} has a booking history. Deletion unsuccessfull. [409]")
             abort(409, message="Client has a booking history! Delete booking history first to proceed...")
         db.session.delete(client) # Deletes an entry
         db.session.commit()
@@ -147,19 +134,6 @@ class Cars(Resource):
         return car, 200
     
     @marshal_with(resource_fields_cars)
-    def post(self, car_id):
-        args = cars_put_args.parse_args()
-        car_check = CarsModel.query.filter_by(id = car_id).first()
-        if car_check != None:
-            logger.info(f"Car with id {car_id} already exists. [409]")
-            abort(409, message="Car id already exists...")
-        car = CarsModel(id=car_id, brand=args['brand'], model=args['model'], year=args['year'], malfunction=args['malfunction'])
-        db.session.add(car)
-        db.session.commit()
-        logger.info(f"Car with id {car_id} created successfully. [201]")
-        return car, 201 
-    
-    @marshal_with(resource_fields_cars)
     def put(self, car_id):
         car = CarsModel.query.filter_by(id = car_id).first()
         if car == None:
@@ -171,7 +145,7 @@ class Cars(Resource):
         db.session.add(car)
         db.session.commit()
         logger.info(f"Car with id {car_id} updated successfully. [201]")
-        return car, 201
+        return car, 200
     
     @marshal_with(resource_fields_cars)
     def delete(self, car_id):
@@ -179,7 +153,7 @@ class Cars(Resource):
         if car == None:
             logger.info(f"Car with id {car_id} doesn't exist. [404]")
             abort(404, message="Car with this id doesn't exists...")
-        booking_check = BookingsModel.query.filter_by(id = car_id).first()
+        booking_check = BookingsModel.query.filter_by(car_id = car_id).first()
         if booking_check != None:
             logger.info(f" Car {car_id} has a booking history. Deletion unsuccessfull. [409]")
             abort(409, message="Client has a booking history! Delete booking history first to proceed...")
@@ -201,26 +175,6 @@ class Bookings(Resource):
         logger.info(f"GET request received for car {booking_id} succesfull. [200]") 
         return booking, 200
     
-    @marshal_with(resource_fields_bookings)
-    def post(self, booking_id):
-        args = bookings_put_args.parse_args()
-        booking_check = BookingsModel.query.filter_by(id = booking_id).first()
-        if booking_check != None:
-            logger.info(f"Booking with id {booking_id} already exists. [409]")
-            abort(409, message="Booking id already exists...")
-        car = CarsModel.query.filter_by(id=args['car_id']).first() # Takes the car/client id the user provided and 
-        if car == None:
-            logger.info(f"Car with id {args['car_id']} not found. [404]")
-            abort(404, message="Car id not found...")
-        client = ClientsModel.query.filter_by(id=args['client_id']).first()
-        if client == None:
-            logger.info(f"Client with id {args['client_id']} not found. [404]")
-            abort(404, message="Client id not found...")
-        booking = BookingsModel(id=booking_id, date=args['date'], hour=args['hour'], car_id=car.id, client_id=client.id) # car_id=car.id checks if car's/client's id proviced by user is present in the database. If its not, the request returns an "AtributeError".
-        db.session.add(booking)
-        db.session.commit()
-        logger.info(f"Booking with id {booking_id} created succesfully. [201]")
-        return booking, 201
     
     @marshal_with(resource_fields_bookings)
     def put(self, booking_id):
@@ -235,7 +189,7 @@ class Bookings(Resource):
         db.session.add(booking)
         db.session.commit() # Changing the client and its car in bookings table would be way too much effort as they are considered bidirectional data with 'cars' and 'clients' class, so in the end its easier to just change 'date' and 'hour' of the appointment.
         logger.info(f"Booking with id {booking_id} updated successfully. [201]")
-        return booking, 201
+        return booking, 200
 
     @marshal_with(resource_fields_bookings)
     def delete(self, booking_id):
@@ -254,11 +208,21 @@ class Bookings(Resource):
 class ClientsList(Resource): # Returns a list of items
 
     @marshal_with(resource_fields_clients)
-    def get(self): 
+    def get(self):
         clients = ClientsModel.query.all() # query.all() = display all the elements from the table
         logger.info(f"Client list returned successfully. [200]")
         return clients
-    
+        
+    @marshal_with(resource_fields_clients)
+    def post(self): 
+        args = clients_put_args.parse_args()
+        client = ClientsModel(firstName=args['firstName'], phone=args['phone'])
+        db.session.add(client) # Adds an object to a database
+        db.session.commit() # Commits changes to the database
+        logger.info(f"Client created with ID {client.id} successfully. [201]")
+        return client, 201 # 201 = CREATED 
+
+
 class CarsList(Resource):
     @marshal_with(resource_fields_cars)
     def get(self): 
@@ -266,12 +230,39 @@ class CarsList(Resource):
         logger.info(f"Client list returned successfully. [200]")
         return cars
     
+    @marshal_with(resource_fields_cars)
+    def post(self):
+        args = cars_put_args.parse_args()
+        car = CarsModel(brand=args['brand'], model=args['model'], year=args['year'], malfunction=args['malfunction'])
+        db.session.add(car)
+        db.session.commit()
+        logger.info(f"Car with id {car.id} created successfully. [201]")
+        return car, 201 
+
+    
 class BookingList(Resource):
     @marshal_with(resource_fields_bookings)
     def get(self):
         bookings = BookingsModel.query.all()
         logger.info(f"Client list returned successfully. [200]")
         return bookings
+    
+    @marshal_with(resource_fields_bookings)
+    def post(self):
+        args = bookings_put_args.parse_args()
+        car = CarsModel.query.filter_by(id=args['car_id']).first()
+        if car == None:
+            logger.info(f"Car with id {args['car_id']} not found. [404]")
+            abort(404, message="Car id not found...")
+        client = ClientsModel.query.filter_by(id=args['client_id']).first()
+        if client == None:
+            logger.info(f"Client with id {args['client_id']} not found. [404]")
+            abort(404, message="Client id not found...")
+        booking = BookingsModel(date=args['date'], hour=args['hour'], car_id=car.id, client_id=client.id) # car_id=car.id checks if car's/client's id proviced by user is present in the database. If its not, the request returns an "AtributeError".
+        db.session.add(booking)
+        db.session.commit()
+        logger.info(f"Booking with id {bookingd} created succesfully. [201]")
+        return booking, 201
 
 
 # Defining endpoints
