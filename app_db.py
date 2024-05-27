@@ -2,7 +2,15 @@
 from flask import Flask         
 from flask_restful import Api, Resource, reqparse, fields, marshal_with, abort
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
+import os
 import logging
+
+load_dotenv()
+login = os.getenv("LOGIN")
+password = os.getenv("PASSWORD")
+host = os.getenv("HOST")
+
 
 logging.basicConfig(filename="logs.log", 
                     level=logging.DEBUG, # logs everything with DEBUG severity level and above (DEBUG, INFO, WARNING, ERROR, and CRITICAL)
@@ -10,7 +18,7 @@ logging.basicConfig(filename="logs.log",
 logger = logging.getLogger(__name__)
 app = Flask(__name__) 
 api = Api(app) # Initializes app with Api extension
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workshop.db' # Database name and location, same directiory as script
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{login}:{password}@{host}/postgres' # Database name and location, ADD PASSWORD ENCRYPTION BEFORE PUSHING (.env)!!!
 db = SQLAlchemy(app) # Same as above
 
 
