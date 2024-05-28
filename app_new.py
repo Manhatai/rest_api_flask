@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 import logging
+from flask import request
 
 load_dotenv()
 login = os.getenv("LOGIN")
@@ -18,7 +19,7 @@ logging.basicConfig(filename="logs.log",
 logger = logging.getLogger(__name__)
 app = Flask(__name__) 
 api = Api(app) # Initializes app with Api extension
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{login}:{password}@{host}/postgres' # Database name and location, ADD PASSWORD ENCRYPTION BEFORE PUSHING (.env)!!!
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{login}:{password}@{host}/postgres' # Database name and location
 db = SQLAlchemy(app) # Same as above
 
 
@@ -47,7 +48,6 @@ class BookingsModel(db.Model):
     car = db.relationship('CarsModel', back_populates='bookings')
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     client = db.relationship('ClientsModel', back_populates='bookings')
-
 
 clients_put_args = reqparse.RequestParser() # Automatically parses through the request being sent (checks if it hass all necesary data)
 clients_put_args.add_argument( "firstName", type=str)
@@ -251,6 +251,8 @@ class CarsList(Resource):
 class BookingList(Resource):
     @marshal_with(resource_fields_bookings)
     def get(self):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         bookings = BookingsModel.query.all()
         logger.info(f"Client list returned successfully. [200]")
         return bookings
@@ -272,6 +274,23 @@ class BookingList(Resource):
         logger.info(f"Booking with id {booking.id} created succesfully. [201]")
         return booking, 201
 
+class Authorize(Resource):
+    
+    
+
+    @marshal_with(resource_fields_bookings)
+    def post(self):
+        args = authorize_post_args.parse_args()
+        users = [
+            {login: "janek123", password: "secret#1"}
+        ]
+        user = next(filter((user)=> userMatchWithPassword(user), users))
+        if user != null:
+            return f"token+{user.login}", 200
+        abort(400)
+
+    def userMatchWithPassword(user):
+        return user.login == args['login'] && user.password == args['password'];
 
 # Defining endpoints
 api.add_resource(Clients, "/clients/<int:client_id>") # The endpoint is set to the id essentialy beeing an input id
