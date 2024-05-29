@@ -26,3 +26,15 @@ For live example:
 { "firstName": "dominik", "phone": 123456789 }
 { "brand": "volkswagen", "model": "golf", "year": 2005, "malfunction": "further_info_needed" }
 { "date": "27.06.2024", "hour": "20:00", "car_id": 6, "client_id": 6 }
+
+args = authorize_post_args.parse_args()
+users = [
+    {login: "janek123", password: "secret#1"}
+]
+user = next(filter((user)=> userMatchWithPassword(user), users))
+if user != null:
+    return f"token+{user.login}", 200
+abort(400)
+
+def userMatchWithPassword(user):
+return user.login == args['login'] && user.password == args['password'];

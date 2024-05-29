@@ -1,5 +1,5 @@
 # Same as app.py, just with a database included.
-from flask import Flask         
+from flask import Flask, jsonify, make_response, Response      
 from flask_restful import Api, Resource, reqparse, fields, marshal_with, abort
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -21,6 +21,7 @@ app = Flask(__name__)
 api = Api(app) # Initializes app with Api extension
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{login}:{password}@{host}/postgres' # Database name and location
 db = SQLAlchemy(app) # Same as above
+
 
 
 class ClientsModel(db.Model): # Basically a database table
@@ -87,11 +88,21 @@ resource_fields_bookings = { # Making a dictionary that defines fields from the 
     'client': fields.Nested(resource_fields_clients)    # data from other resource fields to display it properly in the database. Magic!
 }
 
-  
+authorize_put_args = reqparse.RequestParser()
+authorize_put_args.add_argument( "login", type=str, help="Login is needed.", required=True )
+authorize_put_args.add_argument( "password", type=str, help="Password is required", required=True )
+
+resource_fields_authorize = { 
+    'login': fields.String,
+    'password': fields.String
+}
+
 class Clients(Resource): 
 
     @marshal_with(resource_fields_clients) # Takes the resource value we get from result and serializes it by resource_fields, making it easy to read for the database. Very important!
     def get(self, client_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id picking the first one to display (WITHOUT .first() IT ALWAYS RETURNS A NULL AND CAUSES AN ERROR!!!). Query - from SQL.
         if not client: # if not client: <==> if client == False: 
             logger.info(f"Client with id {client_id} not found. [404]")
@@ -102,6 +113,8 @@ class Clients(Resource):
     
     @marshal_with(resource_fields_clients)
     def put(self, client_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         client = ClientsModel.query.filter_by(id = client_id).first()
         if client == None:
             logger.info(f"Client with id {client_id} doesn't exist. [404]")
@@ -116,6 +129,8 @@ class Clients(Resource):
     
     @marshal_with(resource_fields_clients)
     def delete(self, client_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         client = ClientsModel.query.filter_by(id = client_id).first()
         if client == None:
             logger.info(f" Client with id {client_id} doesn't exist. [404]")
@@ -134,6 +149,8 @@ class Cars(Resource):
 
     @marshal_with(resource_fields_cars)
     def get(self, car_id): 
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         car = CarsModel.query.filter_by(id = car_id).first()
         if not car:
             logger.info(f"Car with id {car_id} not found. [404]")
@@ -143,6 +160,8 @@ class Cars(Resource):
     
     @marshal_with(resource_fields_cars)
     def put(self, car_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         car = CarsModel.query.filter_by(id = car_id).first()
         if car == None:
             logger.info(f"Car with id {car_id} doesn't exist. [404]")
@@ -157,6 +176,8 @@ class Cars(Resource):
     
     @marshal_with(resource_fields_cars)
     def delete(self, car_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         car = CarsModel.query.filter_by(id = car_id).first()
         if car == None:
             logger.info(f"Car with id {car_id} doesn't exist. [404]")
@@ -176,6 +197,8 @@ class Bookings(Resource):
 
     @marshal_with(resource_fields_bookings)
     def get(self, booking_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         booking = BookingsModel.query.filter_by(id=booking_id).first()
         if not booking:
             logger.info(f"Booking with id {booking_id} not found. [404]")
@@ -186,6 +209,8 @@ class Bookings(Resource):
     
     @marshal_with(resource_fields_bookings)
     def put(self, booking_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         booking = BookingsModel.query.filter_by(id = booking_id).first()
         if booking == None:
             logger.info(f"Booking with id {booking_id} doesn't exist. [404]")
@@ -201,6 +226,8 @@ class Bookings(Resource):
 
     @marshal_with(resource_fields_bookings)
     def delete(self, booking_id):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         booking = BookingsModel.query.filter_by(id=booking_id).first()
         if booking == None:
             logger.info(f"Booking with id {booking_id} doesn't exist. [404]")
@@ -217,12 +244,16 @@ class ClientsList(Resource): # Returns a list of items
 
     @marshal_with(resource_fields_clients)
     def get(self):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         clients = ClientsModel.query.all() # query.all() = display all the elements from the table
         logger.info(f"Client list returned successfully. [200]")
         return clients
         
     @marshal_with(resource_fields_clients)
     def post(self): 
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         args = clients_put_args.parse_args()
         client = ClientsModel(firstName=args['firstName'], phone=args['phone'])
         db.session.add(client) # Adds an object to a database
@@ -234,12 +265,16 @@ class ClientsList(Resource): # Returns a list of items
 class CarsList(Resource):
     @marshal_with(resource_fields_cars)
     def get(self): 
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         cars = CarsModel.query.all()
         logger.info(f"Client list returned successfully. [200]")
         return cars
     
     @marshal_with(resource_fields_cars)
     def post(self):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         args = cars_put_args.parse_args()
         car = CarsModel(brand=args['brand'], model=args['model'], year=args['year'], malfunction=args['malfunction'])
         db.session.add(car)
@@ -259,6 +294,8 @@ class BookingList(Resource):
     
     @marshal_with(resource_fields_bookings)
     def post(self):
+        if request.headers.get('Authorize') != "tokenblablalba":
+            abort(401, message="Unauthorized")
         args = bookings_put_args.parse_args()
         car = CarsModel.query.filter_by(id=args['car_id']).first()
         if car == None:
@@ -274,23 +311,25 @@ class BookingList(Resource):
         logger.info(f"Booking with id {booking.id} created succesfully. [201]")
         return booking, 201
 
+
+
 class Authorize(Resource):
     
-    
-
-    @marshal_with(resource_fields_bookings)
+    @marshal_with(resource_fields_authorize)
     def post(self):
-        args = authorize_post_args.parse_args()
         users = [
-            {login: "janek123", password: "secret#1"}
-        ]
-        user = next(filter((user)=> userMatchWithPassword(user), users))
-        if user != null:
-            return f"token+{user.login}", 200
-        abort(400)
+    {"login": "janek123", "password": "blablabla"}
+    ]
+        args = authorize_put_args.parse_args()
+        response = 'token' + args['login']
+        if args in users:
+            
+            return response, 200 # Future idea = display token assigned (nested) to x users id in separate db table
+        else:                                              # For now - you CANNOT return a custom response body in ANY way
+            abort(400, message="User doesn't exist!")
 
-    def userMatchWithPassword(user):
-        return user.login == args['login'] && user.password == args['password'];
+        
+        
 
 # Defining endpoints
 api.add_resource(Clients, "/clients/<int:client_id>") # The endpoint is set to the id essentialy beeing an input id
@@ -301,7 +340,7 @@ api.add_resource(Bookings, "/bookings/<int:booking_id>")
 api.add_resource(ClientsList, "/clients")
 api.add_resource(CarsList, "/cars")
 api.add_resource(BookingList, "/bookings")
-
+api.add_resource(Authorize, "/authorize")
 
 if __name__ == "__main__":
     app.run(debug=True)
