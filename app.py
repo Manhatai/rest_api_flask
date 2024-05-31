@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 import logging
-from flask import request
 
 load_dotenv()
 login = os.getenv("LOGIN")
@@ -49,6 +48,7 @@ class BookingsModel(db.Model):
     car = db.relationship('CarsModel', back_populates='bookings')
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     client = db.relationship('ClientsModel', back_populates='bookings')
+
 
 clients_put_args = reqparse.RequestParser() # Automatically parses through the request being sent (checks if it hass all necesary data)
 clients_put_args.add_argument( "firstName", type=str)
@@ -312,23 +312,13 @@ class BookingList(Resource):
         return booking, 201
 
 
-
 class Authorize(Resource):
     
     @marshal_with(resource_fields_authorize)
     def post(self):
-        users = [
-    {"login": "janek123", "password": "blablabla"}
-    ]
-        args = authorize_put_args.parse_args()
-        response = 'token' + args['login']
-        if args in users:
-            
-            return response, 200 # Future idea = display token assigned (nested) to x users id in separate db table
-        else:                                              # For now - you CANNOT return a custom response body in ANY way
-            abort(400, message="User doesn't exist!")
+        args = authorize_put_args.parse_args()  # Taking input args outside of request instance is permitted :))
+        return '', 200
 
-        
         
 
 # Defining endpoints
