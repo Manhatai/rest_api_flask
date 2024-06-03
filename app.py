@@ -1,9 +1,13 @@
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, make_response, render_template, session
+# import jwt
+# from datetime import datetime, timedelta
+# from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
-# from flask_restful import marshal_with, fields - could add decorators in the future
+# from flask_restful import marshal_with, fields
 from dotenv import load_dotenv
 import os
 import logging
+import bcrypt
 
 load_dotenv()
 login = os.getenv("LOGIN")
@@ -45,25 +49,70 @@ class BookingsModel(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     client = db.relationship('ClientsModel', back_populates='bookings')
 
+class UsersModel(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    login = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+
+class AuthorizationService:
+
+    def __init__(self):
+        self.token = None
+
+    def UserAuthorization(self):
+        data = request.json
+        if not data.get('login'):
+            abort(400, description="Login required!")
+        if not data.get('password'):
+            abort(400, description="Password required!")
+        login = data.get('login')
+        password = data.get('password')
+        user = UsersModel.query.filter_by(login=login).first()
+        if not user:
+            abort(400, description="User with this login doesn't exist...")
+        if bcrypt.checkpw(password.encode("utf-8"), user.password.encode('utf-8')): # user.password = hashed password, will return true if password is correct
+            token = 'token' + login
+            self.token = token
+            return jsonify({"token": token}), 200 
+        else:               
+            abort(400, description="Wrong password!")
+
+    def AuthenticationCheck(self):
+        if request.headers.get('Authorize') != self.token:
+            abort(401, description="Unauthorized")
+
+auth_service = AuthorizationService()
+
+
 @app.route("/authorize", methods=['POST'])
-def UserAuthorization():
-    global token    # Global cause the token variable cannot be moved outside of function beacause its bound to an endpoint, just for task purposes
-    users = [
-    {"login": "janek123", "password": "blablabla"},
-    {"login": "franek", "password": "qwerty1234"},
-    {"login": "andrzej321", "password": "asd123"}
-    ]
+def UserAuth():
+    return auth_service.UserAuthorization()
+
+@app.route("/authorize/register", methods=['POST'])
+def RegisterUser():
     data = request.json
-    if data in users: 
-        token = 'token' + data['login']
-        return jsonify({"token": token}), 200 
-    else:               
-        abort(400, description="User doesn't exist!")
+    if not data.get('login'):
+        abort(400, description="Login required!")
+    if not data.get('password'):
+        abort(400, description="Password required!")
+    login = data.get('login')
+    password = data.get('password')
+    potential_user = UsersModel.query.filter_by(login=login).first()
+    if potential_user.login == login:
+        abort(400, description="Login already exists!")
+    hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()) # .encode for converting string into bytes
+    new_user = UsersModel(login=login, password=hashed.decode('utf-8')) # .decode bytes back to string
+    db.session.add(new_user)
+    db.session.commit()
+    logger.info(f"Client created with ID {new_user.id} successfully. [201]")
+    return f'New user {login} created.', 201
+
 
 @app.route("/clients/<int:client_id>", methods=["GET"])
 def GetClient(client_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id picking the first one to display (WITHOUT .first() IT ALWAYS RETURNS A NULL AND CAUSES AN ERROR!!!). Query - from SQL.
     if not client: # if not client: <=> if client == False: 
         logger.info(f"Client with id {client_id} not found. [404]")
@@ -74,8 +123,7 @@ def GetClient(client_id):
 
 @app.route("/clients/<int:client_id>", methods=["PUT"])
 def UpdateClient(client_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     client = ClientsModel.query.filter_by(id = client_id).first()
     if not client:
         logger.info(f"Client with id {client_id} not found. [404]")
@@ -91,8 +139,7 @@ def UpdateClient(client_id):
 
 @app.route("/clients/<int:client_id>", methods=["DELETE"])
 def DeleteClient(client_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     client = ClientsModel.query.filter_by(id = client_id).first()
     if client == None:
         logger.info(f" Client with id {client_id} doesn't exist. [404]")
@@ -109,8 +156,7 @@ def DeleteClient(client_id):
 
 @app.route("/cars/<int:car_id>", methods=["GET"])
 def GetCar(car_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     car = CarsModel.query.filter_by(id = car_id).first()
     if not car:
         logger.info(f"Car with id {car_id} not found. [404]")
@@ -121,8 +167,7 @@ def GetCar(car_id):
 
 @app.route("/cars/<int:car_id>", methods=["PUT"])
 def UpdateCar(car_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     car = CarsModel.query.filter_by(id = car_id).first()
     if car == None:
         logger.info(f"Car with id {car_id} doesn't exist. [404]")
@@ -138,8 +183,7 @@ def UpdateCar(car_id):
 
 @app.route("/cars/<int:car_id>", methods=["DELETE"])
 def DeleteCar(car_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     car = CarsModel.query.filter_by(id = car_id).first()
     if car == None:
         logger.info(f"Car with id {car_id} doesn't exist. [404]")
@@ -157,8 +201,7 @@ def DeleteCar(car_id):
 
 @app.route("/bookings/<int:booking_id>", methods=["GET"])
 def GetBooking(booking_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     booking = BookingsModel.query.filter_by(id=booking_id).first()
     if not booking:
         logger.info(f"Booking with id {booking_id} not found. [404]")
@@ -184,8 +227,7 @@ def GetBooking(booking_id):
 
 @app.route("/bookings/<int:booking_id>", methods=["PUT"])
 def UpdateBooking(booking_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     booking = BookingsModel.query.filter_by(id = booking_id).first()
     if booking == None:
         logger.info(f"Booking with id {booking_id} doesn't exist. [404]")
@@ -217,8 +259,7 @@ def UpdateBooking(booking_id):
 
 @app.route("/bookings/<int:booking_id>", methods=["DELETE"])
 def DeleteBooking(booking_id):
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     booking = BookingsModel.query.filter_by(id=booking_id).first()
     if booking == None:
         logger.info(f"Booking with id {booking_id} doesn't exist. [404]")
@@ -231,16 +272,15 @@ def DeleteBooking(booking_id):
 
 @app.route("/clients", methods=["GET"])
 def GetClientsList():
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     clients = ClientsModel.query.order_by(ClientsModel.id).all()
     logger.info(f"Client list returned successfully. [200]")
     return jsonify([{'id': client.id, 'firstName': client.firstName, 'phone': client.phone} for client in clients]), 200
 
+
 @app.route("/clients", methods=["POST"])
 def AddNewClient():
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     data = request.json
     new_client = ClientsModel(firstName=data['firstName'], phone=data['phone'])
     db.session.add(new_client) # Adds an object to a database
@@ -252,16 +292,14 @@ def AddNewClient():
 
 @app.route("/cars", methods=["GET"])
 def GetCarsList():
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     cars = CarsModel.query.order_by(CarsModel.id).all()
     logger.info(f"Car list returned successfully. [200]")
     return jsonify([{'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction} for car in cars]), 200
 
 @app.route("/cars", methods=["POST"])
 def AddNewCar():
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     data = request.json
     new_car = CarsModel(brand=data['brand'], model=data['model'], year=data['year'], malfunction=data['malfunction'])
     db.session.add(new_car) 
@@ -273,8 +311,7 @@ def AddNewCar():
 
 @app.route("/bookings", methods=["GET"])
 def GetBookingsList():
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     bookings = BookingsModel.query.order_by(BookingsModel.id).all()
     logger.info(f"Booking list returned successfully. [200]")
     return jsonify([{
@@ -297,8 +334,7 @@ def GetBookingsList():
 
 @app.route("/bookings", methods=["POST"])
 def AddNewBooking():
-    if request.headers.get('Authorize') != token:
-        abort(401, description="Unauthorized")
+    auth_service.AuthenticationCheck()
     data = request.json
     car = CarsModel.query.filter_by(id=data['car_id']).first()
     if car == None:
@@ -332,4 +368,6 @@ def AddNewBooking():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+        app.run(debug=True)
