@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, abort, make_response, render_template, session
-# import jwt
-# from datetime import datetime, timedelta
+import jwt
+from datetime import datetime, timedelta
 # from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 # from flask_restful import marshal_with, fields
@@ -13,6 +13,7 @@ load_dotenv()
 login = os.getenv("LOGIN")
 password = os.getenv("PASSWORD")
 host = os.getenv("HOST")
+sec_key = os.getenv("SECRET_KEY")
 
 logging.basicConfig(filename="logs.log",
                     level=logging.DEBUG,
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{login}:{password}@{host}/postgres'
+app.config['SECRET_KEY'] = sec_key
 db = SQLAlchemy(app)
 
 class ClientsModel(db.Model):
@@ -73,15 +75,18 @@ class AuthorizationService:
         if not user:
             abort(400, description="User with this login doesn't exist...")
         if bcrypt.checkpw(password.encode("utf-8"), user.password.encode('utf-8')): # user.password = hashed password, will return true if password is correct
-            token = 'token' + login
-            self.token = token
+            token = jwt.encode({'user': user.login}, app.config['SECRET_KEY'], algorithm='HS256') # HS256 = HMAC SHA256 header, user_login is the payload, secret_key is the signature.
+            self.token = token # After generating token gets returned as a string of bytes, so need to decode it first
             return jsonify({"token": token}), 200 
         else:               
             abort(400, description="Wrong password!")
 
     def AuthenticationCheck(self):
-        if request.headers.get('Authorize') != self.token:
-            abort(401, description="Unauthorized")
+        header = request.headers.get('Authorize')
+        try:
+            jwt.decode(header, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except:
+            abort(400, description="Token is invalid")
 
 auth_service = AuthorizationService()
 
