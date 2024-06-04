@@ -2,9 +2,8 @@ from flask import Flask, jsonify, request, abort
 import jwt
 import datetime
 from datetime import timedelta
-# from functools import wraps
+from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
-# from flask_restful import marshal_with, fields
 from dotenv import load_dotenv
 import os
 import logging
@@ -25,6 +24,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{login}:{password}@{host}/postgres'
 app.config['SECRET_KEY'] = sec_key
 db = SQLAlchemy(app)
+
 
 class ClientsModel(db.Model):
     __tablename__ = 'clients'
@@ -59,52 +59,23 @@ class UsersModel(db.Model):
     password = db.Column(db.String(100), nullable=False)
 
 
-class AuthorizationService:
-
-    def __init__(self):
-        self.token = None
-
-    def UserAuthorization(self):
-        data = request.json
-        if not data.get('login'):
-            abort(400, description="Login required!")
-        if not data.get('password'):
-            abort(400, description="Password required!")
-        login = data.get('login')
-        password = data.get('password')
-        user = UsersModel.query.filter_by(login=login).first()
-        if not user:
-            abort(400, description="User with this login doesn't exist...")
-        if bcrypt.checkpw(password.encode("utf-8"), user.password.encode('utf-8')): # user.password = hashed password, will return true if password is correct
-            token = jwt.encode({'user': user.login, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'], algorithm='HS256') # HS256 = HMAC SHA256 header, user_login is the payload, secret_key is the signature.
-            self.token = token # After generating token gets returned as a string of bytes, so need to decode it first
-            return jsonify({"token": token}), 200 
-        else:               
-            abort(400, description="Wrong password!")
-
-    def AuthenticationCheck(self):
-        header = request.headers.get('Authorize')
-        try:
-            jwt.decode(header, app.config['SECRET_KEY'], algorithms=['HS256'])
-        except:
-            abort(400, description="Token is invalid")
-
-auth_service = AuthorizationService()
-
-
-def authorization_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
-
-
-
-        return f(*args, **kwargs)
-    return decorator
-
-
 @app.route("/authorize", methods=['POST'])
 def UserAuth():
-    return auth_service.UserAuthorization()
+    data = request.json
+    if not data.get('login'):
+        abort(400, description="Login required!")
+    if not data.get('password'):
+        abort(400, description="Password required!")
+    login = data.get('login')
+    password = data.get('password')
+    user = UsersModel.query.filter_by(login=login).first()
+    if not user:
+        abort(400, description="User with this login doesn't exist...")
+    if bcrypt.checkpw(password.encode("utf-8"), user.password.encode('utf-8')): # user.password = hashed password, will return true if password is correct
+        token = jwt.encode({'user': user.login, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'], algorithm='HS256') # HS256 = HMAC SHA256 header, user_login is the payload, secret_key is the signature.
+        return jsonify({"token": token}), 200 
+    else:               
+        abort(400, description="Wrong password!")
 
 @app.route("/authorize/register", methods=['POST'])
 def RegisterUser():
@@ -126,9 +97,21 @@ def RegisterUser():
     return f'New user {login} created.', 201
 
 
+def authorization_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        header = request.headers.get('Authorize')
+        try:
+            jwt.decode(header, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except:
+            abort(400, description="Token is invalid")
+        return f(*args, **kwargs)
+    return decorator
+
+
 @app.route("/clients/<int:client_id>", methods=["GET"])
+@authorization_required
 def GetClient(client_id):
-    auth_service.AuthenticationCheck()
     client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id picking the first one to display (WITHOUT .first() IT ALWAYS RETURNS A NULL AND CAUSES AN ERROR!!!). Query - from SQL.
     if not client: # if not client: <=> if client == False: 
         logger.info(f"Client with id {client_id} not found. [404]")
@@ -138,8 +121,8 @@ def GetClient(client_id):
 
 
 @app.route("/clients/<int:client_id>", methods=["PUT"])
+@authorization_required
 def UpdateClient(client_id):
-    auth_service.AuthenticationCheck()
     client = ClientsModel.query.filter_by(id = client_id).first()
     if not client:
         logger.info(f"Client with id {client_id} not found. [404]")
@@ -154,8 +137,8 @@ def UpdateClient(client_id):
 
 
 @app.route("/clients/<int:client_id>", methods=["DELETE"])
+@authorization_required
 def DeleteClient(client_id):
-    auth_service.AuthenticationCheck()
     client = ClientsModel.query.filter_by(id = client_id).first()
     if client == None:
         logger.info(f" Client with id {client_id} doesn't exist. [404]")
@@ -171,8 +154,8 @@ def DeleteClient(client_id):
 
 
 @app.route("/cars/<int:car_id>", methods=["GET"])
+@authorization_required
 def GetCar(car_id):
-    auth_service.AuthenticationCheck()
     car = CarsModel.query.filter_by(id = car_id).first()
     if not car:
         logger.info(f"Car with id {car_id} not found. [404]")
@@ -182,8 +165,8 @@ def GetCar(car_id):
 
 
 @app.route("/cars/<int:car_id>", methods=["PUT"])
+@authorization_required
 def UpdateCar(car_id):
-    auth_service.AuthenticationCheck()
     car = CarsModel.query.filter_by(id = car_id).first()
     if car == None:
         logger.info(f"Car with id {car_id} doesn't exist. [404]")
@@ -198,8 +181,8 @@ def UpdateCar(car_id):
     
 
 @app.route("/cars/<int:car_id>", methods=["DELETE"])
+@authorization_required
 def DeleteCar(car_id):
-    auth_service.AuthenticationCheck()
     car = CarsModel.query.filter_by(id = car_id).first()
     if car == None:
         logger.info(f"Car with id {car_id} doesn't exist. [404]")
@@ -216,8 +199,8 @@ def DeleteCar(car_id):
 
 
 @app.route("/bookings/<int:booking_id>", methods=["GET"])
+@authorization_required
 def GetBooking(booking_id):
-    auth_service.AuthenticationCheck()
     booking = BookingsModel.query.filter_by(id=booking_id).first()
     if not booking:
         logger.info(f"Booking with id {booking_id} not found. [404]")
@@ -242,8 +225,8 @@ def GetBooking(booking_id):
         }), 200
 
 @app.route("/bookings/<int:booking_id>", methods=["PUT"])
+@authorization_required
 def UpdateBooking(booking_id):
-    auth_service.AuthenticationCheck()
     booking = BookingsModel.query.filter_by(id = booking_id).first()
     if booking == None:
         logger.info(f"Booking with id {booking_id} doesn't exist. [404]")
@@ -274,8 +257,8 @@ def UpdateBooking(booking_id):
         }), 200
 
 @app.route("/bookings/<int:booking_id>", methods=["DELETE"])
+@authorization_required
 def DeleteBooking(booking_id):
-    auth_service.AuthenticationCheck()
     booking = BookingsModel.query.filter_by(id=booking_id).first()
     if booking == None:
         logger.info(f"Booking with id {booking_id} doesn't exist. [404]")
@@ -287,16 +270,16 @@ def DeleteBooking(booking_id):
 
 
 @app.route("/clients", methods=["GET"])
+@authorization_required
 def GetClientsList():
-    auth_service.AuthenticationCheck()
     clients = ClientsModel.query.order_by(ClientsModel.id).all()
     logger.info(f"Client list returned successfully. [200]")
     return jsonify([{'id': client.id, 'firstName': client.firstName, 'phone': client.phone} for client in clients]), 200
 
 
 @app.route("/clients", methods=["POST"])
+@authorization_required
 def AddNewClient():
-    auth_service.AuthenticationCheck()
     data = request.json
     new_client = ClientsModel(firstName=data['firstName'], phone=data['phone'])
     db.session.add(new_client) # Adds an object to a database
@@ -307,15 +290,15 @@ def AddNewClient():
 
 
 @app.route("/cars", methods=["GET"])
+@authorization_required
 def GetCarsList():
-    auth_service.AuthenticationCheck()
     cars = CarsModel.query.order_by(CarsModel.id).all()
     logger.info(f"Car list returned successfully. [200]")
     return jsonify([{'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction} for car in cars]), 200
 
 @app.route("/cars", methods=["POST"])
+@authorization_required
 def AddNewCar():
-    auth_service.AuthenticationCheck()
     data = request.json
     new_car = CarsModel(brand=data['brand'], model=data['model'], year=data['year'], malfunction=data['malfunction'])
     db.session.add(new_car) 
@@ -326,8 +309,8 @@ def AddNewCar():
 
 
 @app.route("/bookings", methods=["GET"])
+@authorization_required
 def GetBookingsList():
-    auth_service.AuthenticationCheck()
     bookings = BookingsModel.query.order_by(BookingsModel.id).all()
     logger.info(f"Booking list returned successfully. [200]")
     return jsonify([{
@@ -349,8 +332,8 @@ def GetBookingsList():
         } for booking in bookings]), 200
 
 @app.route("/bookings", methods=["POST"])
+@authorization_required
 def AddNewBooking():
-    auth_service.AuthenticationCheck()
     data = request.json
     car = CarsModel.query.filter_by(id=data['car_id']).first()
     if car == None:
@@ -384,6 +367,4 @@ def AddNewBooking():
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        app.run(debug=True)
+    app.run(debug=True)
