@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request, abort, make_response, render_template, session
+from flask import Flask, jsonify, request, abort
 import jwt
-from datetime import datetime, timedelta
+import datetime
+from datetime import timedelta
 # from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 # from flask_restful import marshal_with, fields
@@ -75,7 +76,7 @@ class AuthorizationService:
         if not user:
             abort(400, description="User with this login doesn't exist...")
         if bcrypt.checkpw(password.encode("utf-8"), user.password.encode('utf-8')): # user.password = hashed password, will return true if password is correct
-            token = jwt.encode({'user': user.login}, app.config['SECRET_KEY'], algorithm='HS256') # HS256 = HMAC SHA256 header, user_login is the payload, secret_key is the signature.
+            token = jwt.encode({'user': user.login, "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'], algorithm='HS256') # HS256 = HMAC SHA256 header, user_login is the payload, secret_key is the signature.
             self.token = token # After generating token gets returned as a string of bytes, so need to decode it first
             return jsonify({"token": token}), 200 
         else:               
@@ -89,6 +90,16 @@ class AuthorizationService:
             abort(400, description="Token is invalid")
 
 auth_service = AuthorizationService()
+
+
+def authorization_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+
+
+
+        return f(*args, **kwargs)
+    return decorator
 
 
 @app.route("/authorize", methods=['POST'])
