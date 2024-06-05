@@ -4,12 +4,15 @@ from infra.sql.clients.clients_model import ClientsModel
 from infra.sql.bookings.bookings_model import BookingsModel
 from utils.logger.logger import logger
 from utils.auth.authorization_check import authorization_required
+from utils.catch.global_catch import global_catch
 
 clients_bp = Blueprint("clients_handling", __name__)
 
 @clients_bp.route("/clients/<int:client_id>", methods=["GET"])
+@global_catch
 @authorization_required
 def GetClient(client_id):
+    # raise TypeError("Only integers are allowed") 
     client = ClientsModel.query.filter_by(id = client_id).first() # Filters all of the clients in the database by id picking the first one to display (WITHOUT .first() IT ALWAYS RETURNS A NULL AND CAUSES AN ERROR!!!). Query - from SQL.
     if not client: # if not client: <=> if client == False: 
         logger.info(f"Client with id {client_id} not found. [404]")

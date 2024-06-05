@@ -6,8 +6,8 @@ from config.config import Config
 def authorization_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
-        header = request.headers.get('Authorize')
         try:
+            header = request.headers.get('Authorize')
             jwt.decode(header, Config.SECRET_KEY, algorithms=['HS256'])
         except:
             abort(400, description="Token is invalid")

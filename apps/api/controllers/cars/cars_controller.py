@@ -17,7 +17,6 @@ def GetCar(car_id):
     logger.info(f"GET request received for car {car_id} succesfull. [200]") 
     return jsonify({'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction}), 200
 
-
 @cars_bp.route("/cars/<int:car_id>", methods=["PUT"])
 @authorization_required
 def UpdateCar(car_id):
