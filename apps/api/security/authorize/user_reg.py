@@ -2,7 +2,7 @@ from flask import request, abort, Blueprint
 from datetime import timedelta
 import bcrypt
 from infra.sql.users.users_model import UsersModel
-from infra.sql.database import db
+from infra.sql.db.database import db
 from utils.logger.logger import logger
 
 register_bp = Blueprint("user_reg", __name__)

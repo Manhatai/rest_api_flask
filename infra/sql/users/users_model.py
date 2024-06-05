@@ -1,4 +1,4 @@
-from infra.sql.database import db
+from infra.sql.db.database import db
 
 class UsersModel(db.Model):
     __tablename__ = 'users'

@@ -1,4 +1,4 @@
-from sql.database import db
+from infra.sql.db.database import db
 
 class BookingsModel(db.Model):
     __tablename__ = 'bookings'
