@@ -18,9 +18,6 @@ app.register_blueprint(clients_bp)
 app.register_blueprint(cars_bp)
 app.register_blueprint(bookings_bp)
 
-@app.route('/')
-def hello():
-    return 'Hello, World!'
 
 if __name__ == "__main__":
     with app.app_context():

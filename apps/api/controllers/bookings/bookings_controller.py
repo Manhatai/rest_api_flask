@@ -1,4 +1,7 @@
 from flask import jsonify, abort, request, Blueprint
+from flask_restful import marshal_with, fields
+from apps.api.controllers.cars import cars_controller
+from apps.api.controllers.clients import clients_controller
 from infra.sql.db.database import db
 from infra.sql.clients.clients_model import ClientsModel
 from infra.sql.cars.cars_model import CarsModel
@@ -9,8 +12,17 @@ from utils.catch.global_catch import global_catch
 
 bookings_bp = Blueprint("bookings_handling", __name__)
 
+resource_fields_bookings = { 
+    'id': fields.Integer,
+    'date': fields.String,
+    'hour': fields.String,
+    'car': fields.Nested(cars_controller.resource_fields_cars),       
+    'client': fields.Nested(clients_controller.resource_fields_clients)    
+}
+
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["GET"])
 @global_catch
+@marshal_with(resource_fields_bookings)
 @authorization_required
 def GetBooking(booking_id):
     booking = BookingsModel.query.filter_by(id=booking_id).first()
@@ -18,23 +30,7 @@ def GetBooking(booking_id):
         logger.info(f"Booking with id {booking_id} not found. [404]")
         abort(404, description="Booking with this id doesn't exists...")
     logger.info(f"GET request received for car {booking_id} succesfull. [200]") 
-    return jsonify({
-        'id': booking.id,
-        'date': booking.date,
-        'hour': booking.hour,
-        'car': {
-            'id': booking.car.id,
-            'brand': booking.car.brand,
-            'model': booking.car.model,
-            'year': booking.car.year,
-            'malfunction': booking.car.malfunction
-            },
-        'client': {
-            'id': booking.client.id,
-            'firstName': booking.client.firstName,
-            'phone': booking.client.phone
-            }
-        }), 200
+    return booking, 200
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["PUT"])
 @global_catch
