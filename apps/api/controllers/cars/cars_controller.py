@@ -7,6 +7,8 @@ from utils.logger.logger import logger
 from utils.auth.authorization_check import authorization_required
 from utils.catch.global_catch import global_catch
 
+cars_bp = Blueprint("cars_handling", __name__)
+
 resource_fields_cars = {
     'id': fields.Integer,
     'brand': fields.String,
@@ -14,10 +16,6 @@ resource_fields_cars = {
     'year': fields.Integer,
     'malfunction': fields.String
 }
-
-
-cars_bp = Blueprint("cars_handling", __name__)
-
 
 @cars_bp.route("/cars/<int:car_id>", methods=["GET"])
 @global_catch
