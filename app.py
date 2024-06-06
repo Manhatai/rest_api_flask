@@ -18,11 +18,11 @@ app.register_blueprint(clients_bp)
 app.register_blueprint(cars_bp)
 app.register_blueprint(bookings_bp)
 
-@app.route("/", methods=["GET"])
-def hword():
-    return print("Hello world!")
+@app.route('/')
+def hello():
+    return 'Hello, World!'
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
         app.run(debug=Config.IS_DEBUG)
+
