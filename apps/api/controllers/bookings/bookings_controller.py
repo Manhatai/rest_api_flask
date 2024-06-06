@@ -47,23 +47,7 @@ def UpdateBooking(booking_id):
     db.session.add(booking)
     db.session.commit() # Changing the client and its car in bookings table would be way too much effort as they are considered bidirectional data with 'cars' and 'clients' class, so in the end its easier to just change 'date' and 'hour' of the appointment.
     logger.info(f"Booking with id {booking_id} updated successfully. [201]")
-    return jsonify({
-        'id': booking.id,
-        'date': booking.date,
-        'hour': booking.hour,
-        'car': {
-            'id': booking.car.id,
-            'brand': booking.car.brand,
-            'model': booking.car.model,
-            'year': booking.car.year,
-            'malfunction': booking.car.malfunction
-            },
-        'client': {
-            'id': booking.client.id,
-            'firstName': booking.client.firstName,
-            'phone': booking.client.phone
-            }
-        }), 200
+    return booking, 200
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["DELETE"])
 @global_catch
@@ -85,23 +69,7 @@ def DeleteBooking(booking_id):
 def GetBookingsList():
     bookings = BookingsModel.query.order_by(BookingsModel.id).all()
     logger.info(f"Booking list returned successfully. [200]")
-    return jsonify([{
-        'id': booking.id,
-        'date': booking.date,
-        'hour': booking.hour,
-        'car': {
-            'id': booking.car.id,
-            'brand': booking.car.brand,
-            'model': booking.car.model,
-            'year': booking.car.year,
-            'malfunction': booking.car.malfunction
-            },
-        'client': {
-            'id': booking.client.id,
-            'firstName': booking.client.firstName,
-            'phone': booking.client.phone
-            }
-        } for booking in bookings]), 200
+    return bookings, 200
 
 @bookings_bp.route("/bookings", methods=["POST"])
 @global_catch
@@ -120,20 +88,4 @@ def AddNewBooking():
     db.session.add(new_booking)
     db.session.commit()
     logger.info(f"Booking created successfully. [201]")
-    return jsonify({
-            'id': new_booking.id,
-            'date': new_booking.date,
-            'hour': new_booking.hour,
-            'car': {
-                'id': new_booking.car.id,
-                'brand': new_booking.car.brand,
-                'model': new_booking.car.model,
-                'year': new_booking.car.year,
-                'malfunction': new_booking.car.malfunction
-            },
-            'client': {
-                'id': new_booking.client.id,
-                'firstName': new_booking.client.firstName,
-                'phone': new_booking.client.phone
-            }
-        }), 201
+    return new_booking, 201
