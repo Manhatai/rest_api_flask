@@ -34,6 +34,7 @@ def GetBooking(booking_id):
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["PUT"])
 @global_catch
+@marshal_with(resource_fields_bookings)
 @authorization_required
 def UpdateBooking(booking_id):
     booking = BookingsModel.query.filter_by(id = booking_id).first()
@@ -51,6 +52,7 @@ def UpdateBooking(booking_id):
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["DELETE"])
 @global_catch
+@marshal_with(resource_fields_bookings)
 @authorization_required
 def DeleteBooking(booking_id):
     booking = BookingsModel.query.filter_by(id=booking_id).first()
@@ -65,6 +67,7 @@ def DeleteBooking(booking_id):
 
 @bookings_bp.route("/bookings", methods=["GET"])
 @global_catch
+@marshal_with(resource_fields_bookings)
 @authorization_required
 def GetBookingsList():
     bookings = BookingsModel.query.order_by(BookingsModel.id).all()
@@ -73,6 +76,7 @@ def GetBookingsList():
 
 @bookings_bp.route("/bookings", methods=["POST"])
 @global_catch
+@marshal_with(resource_fields_bookings)
 @authorization_required
 def AddNewBooking():
     data = request.json
