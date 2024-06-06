@@ -21,5 +21,5 @@ app.register_blueprint(bookings_bp)
 
 if __name__ == "__main__":
     with app.app_context():
-        app.run(debug=Config.IS_DEBUG)
+        app.run(ssl_context='adhoc', debug=Config.IS_DEBUG)
 
