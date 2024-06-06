@@ -7,9 +7,10 @@ from apps.api.controllers.clients.clients_controller import clients_bp
 from apps.api.controllers.cars.cars_controller import cars_bp
 from apps.api.controllers.bookings.bookings_controller import bookings_bp
 from flask_migrate import Migrate
+from dotenv import load_dotenv
 
 
-
+load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
@@ -22,4 +23,7 @@ app.register_blueprint(bookings_bp)
 
 
 if __name__ == "__main__":
-       app.run(ssl_context='adhoc', debug=Config.IS_DEBUG)
+    if Config.REST_API_ENV_NAME.lower() == 'local':
+        app.run(debug=Config.IS_DEBUG)
+    else:
+        app.run(ssl_context='adhoc', debug=Config.IS_DEBUG)
