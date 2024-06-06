@@ -6,12 +6,14 @@ from apps.api.security.authorize.user_reg import register_bp
 from apps.api.controllers.clients.clients_controller import clients_bp
 from apps.api.controllers.cars.cars_controller import cars_bp
 from apps.api.controllers.bookings.bookings_controller import bookings_bp
+from flask_migrate import Migrate
 
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+migrate = Migrate(app, db)
 app.register_blueprint(authorize_bp)
 app.register_blueprint(register_bp)
 app.register_blueprint(clients_bp)
