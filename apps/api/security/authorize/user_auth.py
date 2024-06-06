@@ -6,10 +6,12 @@ import bcrypt
 from infra.sql.users.users_model import UsersModel
 from config.config import Config
 from utils.logger.logger import logger
+from utils.catch.global_catch import global_catch
 
 authorize_bp = Blueprint("user_auth", __name__)
 
 @authorize_bp.route("/authorize", methods=['POST'])
+@global_catch
 def UserAuth():
     try:
         data = request.json

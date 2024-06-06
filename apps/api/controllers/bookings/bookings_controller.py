@@ -5,10 +5,12 @@ from infra.sql.cars.cars_model import CarsModel
 from infra.sql.bookings.bookings_model import BookingsModel
 from utils.logger.logger import logger
 from utils.auth.authorization_check import authorization_required
+from utils.catch.global_catch import global_catch
 
 bookings_bp = Blueprint("bookings_handling", __name__)
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["GET"])
+@global_catch
 @authorization_required
 def GetBooking(booking_id):
     booking = BookingsModel.query.filter_by(id=booking_id).first()
@@ -35,6 +37,7 @@ def GetBooking(booking_id):
         }), 200
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["PUT"])
+@global_catch
 @authorization_required
 def UpdateBooking(booking_id):
     booking = BookingsModel.query.filter_by(id = booking_id).first()
@@ -67,6 +70,7 @@ def UpdateBooking(booking_id):
         }), 200
 
 @bookings_bp.route("/bookings/<int:booking_id>", methods=["DELETE"])
+@global_catch
 @authorization_required
 def DeleteBooking(booking_id):
     booking = BookingsModel.query.filter_by(id=booking_id).first()
@@ -80,6 +84,7 @@ def DeleteBooking(booking_id):
 
 
 @bookings_bp.route("/bookings", methods=["GET"])
+@global_catch
 @authorization_required
 def GetBookingsList():
     bookings = BookingsModel.query.order_by(BookingsModel.id).all()
@@ -103,6 +108,7 @@ def GetBookingsList():
         } for booking in bookings]), 200
 
 @bookings_bp.route("/bookings", methods=["POST"])
+@global_catch
 @authorization_required
 def AddNewBooking():
     data = request.json

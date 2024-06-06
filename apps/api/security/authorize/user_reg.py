@@ -4,10 +4,12 @@ import bcrypt
 from infra.sql.users.users_model import UsersModel
 from infra.sql.db.database import db
 from utils.logger.logger import logger
+from utils.catch.global_catch import global_catch
 
 register_bp = Blueprint("user_reg", __name__)
 
 @register_bp.route("/authorize/register", methods=['POST'])
+@global_catch
 def RegisterUser():
     try:
         data = request.json

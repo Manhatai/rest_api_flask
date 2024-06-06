@@ -22,6 +22,7 @@ def GetClient(client_id):
 
 
 @clients_bp.route("/clients/<int:client_id>", methods=["PUT"])
+@global_catch
 @authorization_required
 def UpdateClient(client_id):
     client = ClientsModel.query.filter_by(id = client_id).first()
@@ -38,6 +39,7 @@ def UpdateClient(client_id):
 
 
 @clients_bp.route("/clients/<int:client_id>", methods=["DELETE"])
+@global_catch
 @authorization_required
 def DeleteClient(client_id):
     client = ClientsModel.query.filter_by(id = client_id).first()
@@ -53,6 +55,7 @@ def DeleteClient(client_id):
     return '', 204
 
 @clients_bp.route("/clients", methods=["POST"])
+@global_catch
 @authorization_required
 def AddNewClient():
     data = request.json
@@ -63,6 +66,7 @@ def AddNewClient():
     return jsonify({'id': new_client.id, 'firstName': new_client.firstName, 'phone': new_client.phone}), 201 # 201 = CREATED 
 
 @clients_bp.route("/clients", methods=["GET"])
+@global_catch
 @authorization_required
 def GetClientsList():
     clients = ClientsModel.query.order_by(ClientsModel.id).all()

@@ -4,10 +4,12 @@ from infra.sql.cars.cars_model import CarsModel
 from infra.sql.bookings.bookings_model import BookingsModel
 from utils.logger.logger import logger
 from utils.auth.authorization_check import authorization_required
+from utils.catch.global_catch import global_catch
 
 cars_bp = Blueprint("cars_handling", __name__)
 
 @cars_bp.route("/cars/<int:car_id>", methods=["GET"])
+@global_catch
 @authorization_required
 def GetCar(car_id):
     car = CarsModel.query.filter_by(id = car_id).first()
@@ -18,6 +20,7 @@ def GetCar(car_id):
     return jsonify({'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction}), 200
 
 @cars_bp.route("/cars/<int:car_id>", methods=["PUT"])
+@global_catch
 @authorization_required
 def UpdateCar(car_id):
     car = CarsModel.query.filter_by(id = car_id).first()
@@ -34,6 +37,7 @@ def UpdateCar(car_id):
     
 
 @cars_bp.route("/cars/<int:car_id>", methods=["DELETE"])
+@global_catch
 @authorization_required
 def DeleteCar(car_id):
     car = CarsModel.query.filter_by(id = car_id).first()
@@ -50,6 +54,7 @@ def DeleteCar(car_id):
     return '', 204
 
 @cars_bp.route("/cars", methods=["GET"])
+@global_catch
 @authorization_required
 def GetCarsList():
     cars = CarsModel.query.order_by(CarsModel.id).all()
@@ -57,6 +62,7 @@ def GetCarsList():
     return jsonify([{'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction} for car in cars]), 200
 
 @cars_bp.route("/cars", methods=["POST"])
+@global_catch
 @authorization_required
 def AddNewCar():
     data = request.json
