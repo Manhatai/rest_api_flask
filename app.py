@@ -18,7 +18,9 @@ app.register_blueprint(clients_bp)
 app.register_blueprint(cars_bp)
 app.register_blueprint(bookings_bp)
 
-
+@app.route("/", methods=["GET"])
+def hword():
+    return print("Hello world!")
 
 if __name__ == "__main__":
     with app.app_context():
