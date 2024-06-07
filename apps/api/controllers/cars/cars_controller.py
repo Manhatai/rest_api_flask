@@ -28,7 +28,6 @@ def GetCar(car_id):
         abort(404, description="Car with this id doesn't exists...")  
     logger.info(f"GET request received for car {car_id} succesfull. [200]") 
     return car, 200
-    # return jsonify({'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction}), 200
 
 @cars_bp.route("/cars/<int:car_id>", methods=["PUT"])
 @global_catch
@@ -46,8 +45,6 @@ def UpdateCar(car_id):
     db.session.commit()
     logger.info(f"Car with id {car_id} updated successfully. [201]")
     return car, 200
-    # return jsonify({'id': car.id, 'brand': car.brand, 'model': car.model, 'year': car.year, 'malfunction': car.malfunction}), 200
-    
 
 @cars_bp.route("/cars/<int:car_id>", methods=["DELETE"])
 @global_catch
