@@ -6,6 +6,7 @@ from apps.api.security.authorize.user_reg import register_bp
 from apps.api.controllers.clients.clients_controller import clients_bp
 from apps.api.controllers.cars.cars_controller import cars_bp
 from apps.api.controllers.bookings.bookings_controller import bookings_bp
+from apps.api.controllers.web.web_controller import web_bp
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 
@@ -20,6 +21,7 @@ app.register_blueprint(register_bp)
 app.register_blueprint(clients_bp)
 app.register_blueprint(cars_bp)
 app.register_blueprint(bookings_bp)
+app.register_blueprint(web_bp)
 
 
 if __name__ == "__main__":
