@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to our REST API project! This project is designed to provide a robust and scalable API for managing various resources. The API is built with Python and leverages SQLAlchemy for ORM functionality. It is hosted on DigitalOcean's App Platform, ensuring reliable and scalable infrastructure. The database used is PostgreSQL, providing a powerful and flexible database management system.
+Welcome to my REST API project! This project is designed to provide a robust and scalable API for managing various resources. The API is built with Python and leverages SQLAlchemy for ORM functionality. It is hosted on DigitalOcean's App Platform, ensuring reliable and scalable infrastructure. The database used is PostgreSQL, providing a powerful and flexible database management system. It can be ran locally if desired.
 
 # Technologies:
 
