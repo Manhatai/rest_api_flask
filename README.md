@@ -45,8 +45,8 @@ Setup environment variables in a .env file:
     REST_API_SECRET_KEY=""
     REST_API_IS_DEBUG="true"
     REST_API_ENV_NAME="LOCAL"
-    REST_API
-
+    REST_API_LOCAL_TOKEN="" # This ones just for local testing purposes, put your generated web token here
+ 
 
 # Setting up the database:
 Ensure that PostgreSQL 16 is installed and running. Create a new database and update the your environment variables accordingly.
