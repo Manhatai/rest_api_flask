@@ -80,6 +80,8 @@ def GetBookingsList():
 @authorization_required
 def AddNewBooking():
     data = request.json
+    if not data['date'] or not data['hour'] or not data["car_id"] or not data['client_id']:
+        abort(400, description="Data cannot be empty!")
     car = CarsModel.query.filter_by(id=data['car_id']).first()
     if car == None:
         logger.info(f"Car with id {data['car_id']} not found. [404]")

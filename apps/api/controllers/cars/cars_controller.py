@@ -81,6 +81,8 @@ def GetCarsList():
 def AddNewCar():
     data = request.json
     new_car = CarsModel(brand=data['brand'], model=data['model'], year=data['year'], malfunction=data['malfunction'])
+    if not data['brand'] or not data['model'] or not data['year'] or not data['malfunction']:
+        abort(400, description="Data cannot be empty!")
     db.session.add(new_car) 
     db.session.commit() 
     logger.info(f"Client created with ID {new_car.id} successfully. [201]")

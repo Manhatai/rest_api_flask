@@ -11,4 +11,5 @@ class Config: # We need to create a Config class for our config to become modula
     SQLALCHEMY_DATABASE_URI = f'postgresql://{__DB_CREDENTIALS}@{__DB_BASE_HOST}/{os.getenv("REST_API_DB_NAME")}'
     SECRET_KEY = os.getenv("REST_API_SECRET_KEY")
     IS_DEBUG = __str2bool(os.getenv("REST_API_IS_DEBUG"))
-    REST_API_ENV_NAME = os.getenv("REST_API_ENV_NAME")
+    REST_API_ENV_TYPE = os.getenv("REST_API_ENV_TYPE")
+    LOCAL_TOKEN = os.getenv("REST_API_LOCAL_TOKEN")

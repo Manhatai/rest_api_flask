@@ -27,7 +27,6 @@ def GetClient(client_id):
         abort(404, description="Client with this id doesn't exists...")  # 404 = Not Found  
     logger.info(f"GET request for client {client_id} successfull. [200]") # Saves what happened with the server in logs.log - file
     return client, 200
-    # return jsonify({'id': client.id, 'firstName': client.firstName, 'phone': client.phone}), 200
 
 
 @clients_bp.route("/clients/<int:client_id>", methods=["PUT"])
@@ -46,7 +45,6 @@ def UpdateClient(client_id):
     db.session.commit()
     logger.info(f"Client with id {client_id} updated successfully. [201]")
     return client, 200
-    # return jsonify({'id': client.id, 'firstName': client.firstName, 'phone': client.phone}), 200
 
 
 @clients_bp.route("/clients/<int:client_id>", methods=["DELETE"])
@@ -73,11 +71,12 @@ def DeleteClient(client_id):
 def AddNewClient():
     data = request.json
     new_client = ClientsModel(firstName=data['firstName'], phone=data['phone'])
+    if not data['firstName'] or not data['phone']:
+        abort(400, description="Data cannot be empty!")
     db.session.add(new_client) # Adds an object to a database
     db.session.commit() # Commits changes to the database
     logger.info(f"Client created with ID {new_client.id} successfully. [201]")
-    return new_client, 200
-    # return jsonify({'id': new_client.id, 'firstName': new_client.firstName, 'phone': new_client.phone}), 201 # 201 = CREATED 
+    return new_client, 201
 
 @clients_bp.route("/clients", methods=["GET"])
 @global_catch
@@ -87,6 +86,5 @@ def GetClientsList():
     clients = ClientsModel.query.order_by(ClientsModel.id).all()
     logger.info(f"Client list returned successfully. [200]")
     return clients, 200
-    # return jsonify([{'id': client.id, 'firstName': client.firstName, 'phone': client.phone} for client in clients]), 200
 
 

@@ -25,7 +25,7 @@ app.register_blueprint(web_bp)
 
 
 if __name__ == "__main__":
-    if Config.REST_API_ENV_NAME.lower() == 'local':
+    if Config.REST_API_ENV_TYPE.lower() == 'local':
         app.run(debug=Config.IS_DEBUG)
     else:
         app.run(ssl_context='adhoc', debug=Config.IS_DEBUG)
