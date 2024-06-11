@@ -45,6 +45,7 @@ Setup environment variables in a .env file:
     REST_API_SECRET_KEY=""
     REST_API_IS_DEBUG="true"
     REST_API_ENV_NAME="LOCAL"
+    REST_API
 
 
 # Setting up the database:
@@ -86,6 +87,6 @@ DigitalOcean will automatically build and deploy your application whenever you p
 
 Set up the necessary environment variables, such as the database URL, in the DigitalOcean App Platform settings.
 
-5. Monitor the Deployment:
+5. Manage your database:
 
-You can monitor the deployment process in the DigitalOcean dashboard. Once the deployment is complete, your application will be live and accessible.
+Follow 'Setting up the database' section for deploying your database in the cloud system.
