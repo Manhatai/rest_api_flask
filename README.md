@@ -7,7 +7,7 @@ Welcome to my REST API project! This project is designed to provide a robust and
     - Infrastructure: DigitalOcean App Platform
     - Database: PostgreSQL 16
     - ORM: SQLAlchemy 2.0.30
-    - Framweork: Flask 3.0.3
+    - Framework: Flask 3.0.3
     - Programming Language: Python 3.12
     - Python Libraries:
         - Flask-RESTful (for building REST APIs)
